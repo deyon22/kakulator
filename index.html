@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Kalkulator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: Arial;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background: #121212;
+    }
+    .box {
+      background: #1e1e1e;
+      padding: 20px;
+      border-radius: 10px;
+      width: 260px;
+    }
+    input, button {
+      width: 100%;
+      margin: 5px 0;
+      padding: 10px;
+      font-size: 16px;
+    }
+    button {
+      background: #4caf50;
+      border: none;
+      color: white;
+      border-radius: 5px;
+    }
+    .hasil {
+      margin-top: 10px;
+      font-size: 18px;
+      color: #fff;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <input id="a" type="number" placeholder="Angka 1">
+    <input id="b" type="number" placeholder="Angka 2">
+    <button onclick="hitung()">Tambah</button>
+    <div class="hasil" id="hasil">Hasil: 0</div>
+  </div>
+
+  <script>
+    function hitung() {
+      let a = parseFloat(document.getElementById("a").value) || 0;
+      let b = parseFloat(document.getElementById("b").value) || 0;
+      document.getElementById("hasil").innerText = "Hasil: " + (a + b);
+    }
+  </script>
+</body>
+</html>
