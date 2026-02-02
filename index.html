@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Kalkulator Crypto</title>
+<title>Crypto Converter</title>
 
 <style>
 body{
@@ -13,31 +13,42 @@ body{
   display:flex;
   justify-content:center;
   align-items:center;
-  height:100vh;
+  min-height:100vh;
 }
 .box{
-  width:320px;
+  width:95%;
+  max-width:900px;
   background:#111;
   padding:20px;
   border-radius:16px;
 }
-select,input,button{
-  width:100%;
-  padding:12px;
-  margin-top:10px;
+select,input{
+  padding:10px;
   border-radius:8px;
   border:none;
   font-size:16px;
 }
-button{
-  background:#ff9500;
-  color:#000;
-  font-weight:bold;
+.controls{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-bottom:15px;
 }
-.result{
-  margin-top:15px;
-  font-size:18px;
+table{
+  width:100%;
+  border-collapse:collapse;
   text-align:center;
+}
+th,td{
+  border:1px solid #333;
+  padding:12px;
+}
+th{
+  background:#1e1e1e;
+}
+td{
+  background:#000;
+  font-size:18px;
 }
 </style>
 </head>
@@ -45,66 +56,83 @@ button{
 <body>
 
 <div class="box">
-  <h2 style="text-align:center">Crypto Calculator</h2>
+  <h2>Crypto Converter (Per Kolom)</h2>
 
-  <select id="coin"></select>
+  <div class="controls">
+    <input id="amount" type="number" value="1" step="0.0001">
+    <select id="base"></select>
+  </div>
 
-  <input type="number" id="amount" placeholder="Jumlah Coin">
-
-  <button onclick="hitung()">Hitung</button>
-
-  <div class="result" id="hasil">---</div>
+  <table>
+    <thead>
+      <tr>
+        <th>BTC</th>
+        <th>ETH</th>
+        <th>USDT</th>
+        <th>USDC</th>
+        <th>SOL</th>
+        <th>BNB</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr id="result">
+        <td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td>
+      </tr>
+    </tbody>
+  </table>
 </div>
 
 <script>
-let coins = [];
+const coins = {
+  btc: "bitcoin",
+  eth: "ethereum",
+  usdt: "tether",
+  usdc: "usd-coin",
+  sol: "solana",
+  bnb: "binancecoin"
+};
 
-async function loadCoins(){
-  const res = await fetch(
-    "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=250&page=1"
+async function loadBase(){
+  const base = document.getElementById("base");
+  for(let c in coins){
+    let o = document.createElement("option");
+    o.value = c;
+    o.text = c.toUpperCase();
+    base.add(o);
+  }
+  convert();
+}
+
+async function convert(){
+  let amount = parseFloat(document.getElementById("amount").value) || 1;
+  let base = document.getElementById("base").value;
+
+  let ids = Object.values(coins).join(",");
+  let res = await fetch(
+    `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd`
   );
-  coins = await res.json();
+  let data = await res.json();
 
-  let select = document.getElementById("coin");
-  coins.forEach(c=>{
-    let opt = document.createElement("option");
-    opt.value = c.id;
-    opt.text = `${c.symbol.toUpperCase()} - ${c.name}`;
-    select.add(opt);
-  });
+  let baseUsd = data[coins[base]].usd;
+
+  let tds = document.querySelectorAll("#result td");
+  let i = 0;
+  for(let c in coins){
+    let usd = data[coins[c]].usd;
+    let value = (baseUsd / usd) * amount;
+    tds[i].innerText = value.toFixed(6);
+    i++;
+  }
 }
 
-async function hitung(){
-  let coinId = document.getElementById("coin").value;
-  let amount = parseFloat(document.getElementById("amount").value) || 0;
+document.getElementById("amount").oninput = convert;
+document.getElementById("base").onchange = convert;
 
-  let coin = coins.find(c=>c.id === coinId);
-  let usd = amount * coin.current_price;
-
-  document.getElementById("hasil").innerHTML =
-    `${amount} ${coin.symbol.toUpperCase()} ≈ <br>
-     $${usd.toLocaleString()} USD`;
-}
-
-loadCoins();
+loadBase();
 </script>
 
 </body>
-</html>  function input(value) {
-    if (current === "0") current = "";
-    current += value;
-    display.innerText = current;
-  }
-
-  function clearAll() {
-    current = "";
-    display.innerText = "0";
-  }
-
-  function backspace() {
-    current = current.slice(0, -1);
-    display.innerText = current || "0";
-  }
+</html>  }
 
   function calculate() {
     try {
