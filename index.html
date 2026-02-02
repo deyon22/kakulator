@@ -3,108 +3,94 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Kalkulator</title>
+<title>Kalkulator Crypto</title>
 
 <style>
-  body {
-    margin: 0;
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background: #000;
-    font-family: Arial, sans-serif;
-  }
-
-  .calculator {
-    width: 300px;
-    background: #000;
-    border-radius: 20px;
-    padding: 20px;
-  }
-
-  .display {
-    height: 80px;
-    color: white;
-    font-size: 36px;
-    text-align: right;
-    padding: 10px;
-    overflow: hidden;
-  }
-
-  .buttons {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 10px;
-  }
-
-  button {
-    height: 60px;
-    font-size: 22px;
-    border-radius: 50%;
-    border: none;
-    cursor: pointer;
-  }
-
-  .number {
-    background: #333;
-    color: white;
-  }
-
-  .operator {
-    background: #ff9500;
-    color: white;
-  }
-
-  .function {
-    background: #a5a5a5;
-    color: black;
-  }
-
-  .zero {
-    grid-column: span 2;
-    border-radius: 40px;
-  }
+body{
+  background:#000;
+  color:#fff;
+  font-family:Arial;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+}
+.box{
+  width:320px;
+  background:#111;
+  padding:20px;
+  border-radius:16px;
+}
+select,input,button{
+  width:100%;
+  padding:12px;
+  margin-top:10px;
+  border-radius:8px;
+  border:none;
+  font-size:16px;
+}
+button{
+  background:#ff9500;
+  color:#000;
+  font-weight:bold;
+}
+.result{
+  margin-top:15px;
+  font-size:18px;
+  text-align:center;
+}
 </style>
 </head>
 
 <body>
 
-<div class="calculator">
-  <div class="display" id="display">0</div>
+<div class="box">
+  <h2 style="text-align:center">Crypto Calculator</h2>
 
-  <div class="buttons">
-    <button class="function" onclick="clearAll()">C</button>
-    <button class="function" onclick="backspace()">⌫</button>
-    <button class="function" onclick="input('%')">%</button>
-    <button class="operator" onclick="input('/')">÷</button>
+  <select id="coin"></select>
 
-    <button class="number" onclick="input('7')">7</button>
-    <button class="number" onclick="input('8')">8</button>
-    <button class="number" onclick="input('9')">9</button>
-    <button class="operator" onclick="input('*')">×</button>
+  <input type="number" id="amount" placeholder="Jumlah Coin">
 
-    <button class="number" onclick="input('4')">4</button>
-    <button class="number" onclick="input('5')">5</button>
-    <button class="number" onclick="input('6')">6</button>
-    <button class="operator" onclick="input('-')">−</button>
+  <button onclick="hitung()">Hitung</button>
 
-    <button class="number" onclick="input('1')">1</button>
-    <button class="number" onclick="input('2')">2</button>
-    <button class="number" onclick="input('3')">3</button>
-    <button class="operator" onclick="input('+')">+</button>
-
-    <button class="number zero" onclick="input('0')">0</button>
-    <button class="number" onclick="input('.')">.</button>
-    <button class="operator" onclick="calculate()">=</button>
-  </div>
+  <div class="result" id="hasil">---</div>
 </div>
 
 <script>
-  let display = document.getElementById("display");
-  let current = "";
+let coins = [];
 
-  function input(value) {
+async function loadCoins(){
+  const res = await fetch(
+    "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=250&page=1"
+  );
+  coins = await res.json();
+
+  let select = document.getElementById("coin");
+  coins.forEach(c=>{
+    let opt = document.createElement("option");
+    opt.value = c.id;
+    opt.text = `${c.symbol.toUpperCase()} - ${c.name}`;
+    select.add(opt);
+  });
+}
+
+async function hitung(){
+  let coinId = document.getElementById("coin").value;
+  let amount = parseFloat(document.getElementById("amount").value) || 0;
+
+  let coin = coins.find(c=>c.id === coinId);
+  let usd = amount * coin.current_price;
+
+  document.getElementById("hasil").innerHTML =
+    `${amount} ${coin.symbol.toUpperCase()} ≈ <br>
+     $${usd.toLocaleString()} USD`;
+}
+
+loadCoins();
+</script>
+
+</body>
+</html>  function input(value) {
     if (current === "0") current = "";
     current += value;
     display.innerText = current;
